@@ -91,6 +91,7 @@ public class UserController {
     public void redeemReward(@PathVariable Integer rewardId,@RequestHeader("Authorization") String token){
         Integer userId = userTokenIdManager.getIdFromToken(token);
         userService.redeemReward(rewardId,userId);
+        //test
     }
 
 }
