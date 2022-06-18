@@ -1,6 +1,7 @@
 package com.example.sen_touroperator.service.impl;
 
 import com.example.sen_touroperator.exception_handler.exceptions.LandmarkException;
+import com.example.sen_touroperator.exception_handler.exceptions.UserException;
 import com.example.sen_touroperator.models.DAO.Landmark;
 import com.example.sen_touroperator.models.DAO.Review;
 import com.example.sen_touroperator.models.DTO.ReviewDto;
@@ -28,9 +29,12 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public void createReview(ReviewDto rewardDto, Integer landmarkId,Integer userId) {
-        Review review = modelMapper.map(rewardDto,Review.class);
+    public void createReview(ReviewDto reviewDto, Integer landmarkId,Integer userId) {
+        Review review = modelMapper.map(reviewDto,Review.class);
         Landmark landmark = landmarkRepository.getLandmarkById(landmarkId).orElse(null);
+        if(reviewDto.getStars()>5 || reviewDto.getStars()<1){
+            throw new UserException("Star must be between 1-5");
+        }
         if(landmark == null){
             throw new LandmarkException("Landmark doesn't exist");
         }

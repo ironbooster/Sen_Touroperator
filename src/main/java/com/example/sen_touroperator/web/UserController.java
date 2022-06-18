@@ -41,7 +41,7 @@ public class UserController {
     private UserTokenIdManager userTokenIdManager;
 
 //UserPAGE
-    @GetMapping(value = "/landmarks")
+    @GetMapping(value = "/profile")
     public UserProfileDto userInfo(@RequestHeader("Authorization") String token){
         Integer userId = userTokenIdManager.getIdFromToken(token);
         return  userService.userProfileInfo(userId);
@@ -61,10 +61,11 @@ public class UserController {
     }
     //VISIT LANDMARK
     @GetMapping(value = "/visit-landmark/{landmarkName}")
-    public void visitLandmark(@RequestHeader("Authorization") String token,
+    public String visitLandmark(@RequestHeader("Authorization") String token,
                               @PathVariable String landmarkName){
         Integer userId = userTokenIdManager.getIdFromToken(token);
         userService.visitLandmark(landmarkName,userId);
+        return "You visited "+landmarkName;
     }
 
     @PostMapping("/login")
@@ -88,10 +89,10 @@ public class UserController {
     }
 //REDEEM REWARD
     @PostMapping("/redeem-reward/{rewardId}")
-    public void redeemReward(@PathVariable Integer rewardId,@RequestHeader("Authorization") String token){
+    public String redeemReward(@PathVariable Integer rewardId,@RequestHeader("Authorization") String token){
         Integer userId = userTokenIdManager.getIdFromToken(token);
         userService.redeemReward(rewardId,userId);
-        //test
+        return "Reward redeemed";
     }
 
 }

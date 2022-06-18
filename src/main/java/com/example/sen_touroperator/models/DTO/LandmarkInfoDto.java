@@ -13,6 +13,17 @@ public class LandmarkInfoDto {
     private List<ReviewDto> landmarkReviews;
     private BestHotelInRegionDto bestHotelInRegion;
 
+    private String qrCode;
+
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    public LandmarkInfoDto setQrCode(String qrCode) {
+        this.qrCode = qrCode;
+        return this;
+    }
+
     public BestHotelInRegionDto getBestHotelInRegion() {
         return bestHotelInRegion;
     }

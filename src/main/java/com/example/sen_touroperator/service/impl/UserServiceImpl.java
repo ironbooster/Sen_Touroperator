@@ -1,10 +1,8 @@
 package com.example.sen_touroperator.service.impl;
 
 import com.example.sen_touroperator.config.security.PasswordHash;
-import com.example.sen_touroperator.exception_handler.exceptions.EmailPatternInvalid;
-import com.example.sen_touroperator.exception_handler.exceptions.PasswordPatternInvalid;
-import com.example.sen_touroperator.exception_handler.exceptions.RewardException;
-import com.example.sen_touroperator.exception_handler.exceptions.UserException;
+import com.example.sen_touroperator.exception_handler.exceptions.*;
+import com.example.sen_touroperator.models.DAO.Landmark;
 import com.example.sen_touroperator.models.DAO.Reward;
 import com.example.sen_touroperator.models.DAO.User;
 import com.example.sen_touroperator.models.DTO.RewardDto;
@@ -12,6 +10,7 @@ import com.example.sen_touroperator.models.DTO.user.UserLoginDto;
 import com.example.sen_touroperator.models.DTO.user.UserProfileDto;
 import com.example.sen_touroperator.models.DTO.user.UserRegisterDto;
 import com.example.sen_touroperator.models.DTO.user.UserRewardsDto;
+import com.example.sen_touroperator.repositroy.LandmarkRepository;
 import com.example.sen_touroperator.repositroy.RewardRepository;
 import com.example.sen_touroperator.repositroy.UserRepository;
 import com.example.sen_touroperator.repositroy.mySql.MySQLRewardRepository;
@@ -37,7 +36,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import java.util.stream.Collectors;
 
 
 @Service
@@ -48,17 +47,20 @@ public class UserServiceImpl implements UserService {
 
     private final JavaMailSender mailSender = new JavaMailSenderImpl();
     private final RewardRepository rewardRepository;
+    private final LandmarkRepository landmarkRepository;
     private final ModelMapper modelMapper;
     PasswordHash passwordHash;
 
     public UserServiceImpl(UserRepository userRepository,
                            PasswordHash passwordHash,
+                           LandmarkRepository landmarkRepository,
                            ModelMapper modelMapper,
                            RewardRepository rewardRepository) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
         this.rewardRepository = rewardRepository;
         this.passwordHash = passwordHash;
+        this.landmarkRepository = landmarkRepository;
     }
 
     @Override
@@ -114,6 +116,19 @@ public class UserServiceImpl implements UserService {
 
         userRepository.visitLandmark(landmarkName,userId);
         User userDao = userRepository.findUserById(userId).orElseThrow();
+
+        List<Landmark> landmarkList = landmarkRepository.getLandmarksByUserLocation(userDao.getRegion());
+        Landmark validLandmark = landmarkList
+                .stream()
+                .filter(landmark -> landmark.getName().equals(landmarkName))
+                .toList()
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        if(validLandmark == null){
+            throw new LandmarkException("You cannot use the QR_code of a landmark when you are not in its region");
+        }
 
 
         if(userDao.getVisitedLandmarks().size() % 3 ==0){
