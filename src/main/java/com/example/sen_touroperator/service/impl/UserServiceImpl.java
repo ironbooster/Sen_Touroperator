@@ -16,9 +16,11 @@ import com.example.sen_touroperator.repositroy.UserRepository;
 import com.example.sen_touroperator.repositroy.mySql.MySQLRewardRepository;
 import com.example.sen_touroperator.repositroy.mySql.MySQLUserRepository;
 import com.example.sen_touroperator.service.UserService;
+import com.example.sen_touroperator.service.mail_gun.MailSenderService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -45,13 +47,16 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    private final JavaMailSender mailSender = new JavaMailSenderImpl();
+    private final MailSenderService mailSenderService;
+
+    //private final JavaMailSender mailSender = new JavaMailSenderImpl();
     private final RewardRepository rewardRepository;
     private final LandmarkRepository landmarkRepository;
     private final ModelMapper modelMapper;
     PasswordHash passwordHash;
 
     public UserServiceImpl(UserRepository userRepository,
+                           MailSenderService mailSenderService,
                            PasswordHash passwordHash,
                            LandmarkRepository landmarkRepository,
                            ModelMapper modelMapper,
@@ -61,6 +66,7 @@ public class UserServiceImpl implements UserService {
         this.rewardRepository = rewardRepository;
         this.passwordHash = passwordHash;
         this.landmarkRepository = landmarkRepository;
+        this.mailSenderService = mailSenderService;
     }
 
     @Override
@@ -141,13 +147,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void redeemReward(Integer rewardId, Integer userId) {
-//        Reward reward = rewardRepository.getRewardById(rewardId).orElseThrow();
-//        User user = userRepository.findUserById(userId).orElseThrow();
-//        try {
-//            sendMailReward(user,reward);
-//        }catch (MessagingException|UnsupportedEncodingException e){
-//            e.printStackTrace();
-//        }
+        Reward reward = rewardRepository.getRewardById(rewardId);
+        User user = userRepository.findUserById(userId).orElseThrow();
+        final String emailBody = "" + user.getUsername() + "received " + reward.getTitle()+": " +reward.getDescription();
+
+        mailSenderService.sendMail("SenTouroperator Reward Redeemed",emailBody,"petar.krastev@trading212.com");
+
         rewardRepository.redeemReward(rewardId,userId);
     }
 
