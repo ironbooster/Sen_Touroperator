@@ -5,40 +5,24 @@ import com.example.sen_touroperator.exception_handler.exceptions.*;
 import com.example.sen_touroperator.models.DAO.Landmark;
 import com.example.sen_touroperator.models.DAO.Reward;
 import com.example.sen_touroperator.models.DAO.User;
-import com.example.sen_touroperator.models.DTO.RewardDto;
-import com.example.sen_touroperator.models.DTO.user.UserLoginDto;
 import com.example.sen_touroperator.models.DTO.user.UserProfileDto;
 import com.example.sen_touroperator.models.DTO.user.UserRegisterDto;
 import com.example.sen_touroperator.models.DTO.user.UserRewardsDto;
 import com.example.sen_touroperator.repositroy.LandmarkRepository;
 import com.example.sen_touroperator.repositroy.RewardRepository;
 import com.example.sen_touroperator.repositroy.UserRepository;
-import com.example.sen_touroperator.repositroy.mySql.MySQLRewardRepository;
-import com.example.sen_touroperator.repositroy.mySql.MySQLUserRepository;
 import com.example.sen_touroperator.service.UserService;
-import com.example.sen_touroperator.service.mail_gun.MailSenderService;
+import com.example.sen_touroperator.service.mail_gun.MailService;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.mail.MailSender;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 
-import javax.mail.MessagingException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import java.io.UnsupportedEncodingException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -47,7 +31,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    private final MailSenderService mailSenderService;
+    private final MailService mailService;
 
     //private final JavaMailSender mailSender = new JavaMailSenderImpl();
     private final RewardRepository rewardRepository;
@@ -56,7 +40,7 @@ public class UserServiceImpl implements UserService {
     PasswordHash passwordHash;
 
     public UserServiceImpl(UserRepository userRepository,
-                           MailSenderService mailSenderService,
+                           MailService mailService,
                            PasswordHash passwordHash,
                            LandmarkRepository landmarkRepository,
                            ModelMapper modelMapper,
@@ -66,7 +50,7 @@ public class UserServiceImpl implements UserService {
         this.rewardRepository = rewardRepository;
         this.passwordHash = passwordHash;
         this.landmarkRepository = landmarkRepository;
-        this.mailSenderService = mailSenderService;
+        this.mailService = mailService;
     }
 
     @Override
@@ -96,6 +80,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserProfileDto userProfileInfo(Integer id) {
         User userDao = userRepository.findUserById(id).orElse(null);
+
        return modelMapper.map(userDao, UserProfileDto.class);
 
     }
@@ -149,9 +134,9 @@ public class UserServiceImpl implements UserService {
     public void redeemReward(Integer rewardId, Integer userId) {
         Reward reward = rewardRepository.getRewardById(rewardId);
         User user = userRepository.findUserById(userId).orElseThrow();
-        final String emailBody = "" + user.getUsername() + "received " + reward.getTitle()+": " +reward.getDescription();
+        final String emailBody = "" + user.getUsername() + " received " + reward.getTitle()+": " +reward.getDescription();
 
-        mailSenderService.sendMail("SenTouroperator Reward Redeemed",emailBody,"petar.krastev@trading212.com");
+        mailService.sendMail("SenTouroperator Reward Redeemed",emailBody,"ironbooster014@gmail.com");
 
         rewardRepository.redeemReward(rewardId,userId);
     }

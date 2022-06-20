@@ -19,6 +19,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -128,11 +129,12 @@ public class LandmarkServiceImpl implements LandmarkService {
         return landmarkDtos;
     }
     private double calculateAvgRating(Integer landmarkId){
-        return Math.round( reviewRepository
+        final DecimalFormat df = new DecimalFormat("0.00");
+        return  Double.parseDouble(df.format(reviewRepository
                 .getAvgRatingOfLandmark(landmarkId)
                 .stream()
                 .mapToDouble( d->d)
                 .average()
-                .orElse(0.00));
+                .orElse(0.00)));
     }
 }

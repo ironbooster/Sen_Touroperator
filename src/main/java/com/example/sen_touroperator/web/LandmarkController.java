@@ -26,13 +26,14 @@ public class LandmarkController {
 
 
     @PostMapping("/review/{landmarkID}")
-    public void writeReview(@PathVariable Integer landmarkID,
+    public String writeReview(@PathVariable Integer landmarkID,
                             @RequestBody ReviewDto reviewDto,
                             @RequestHeader("Authorization") String token){
         Integer userId = userTokenIdManager.getIdFromToken(token);
         reviewService.createReview(reviewDto,landmarkID,userId );
+        return "Succesfull";
     }
-    @PostMapping("/review/delete/{id}")
+    @DeleteMapping("/review/delete/{id}")
     public void deleteReview(@PathVariable Integer id,
                              @RequestHeader("Authorization") String token){
         String userRole = userTokenIdManager.getRoleFromToken(token);
