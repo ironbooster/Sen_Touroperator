@@ -63,7 +63,7 @@ public class LandmarkServiceImpl implements LandmarkService {
     @Override
     public void createLandmark(LandmarkDto landmarkBindingDto) {
         Landmark landmarkDao = modelMapper.map(landmarkBindingDto,Landmark.class);
-        String visitLinkEndPoint ="http:/localhost:8080/visit-landmark/"+landmarkDao.getName();
+        String visitLinkEndPoint ="http://localhost:8080/users/visit-landmark/"+landmarkDao.getName();
 
 
         String qrBytes = Base64.getEncoder()
